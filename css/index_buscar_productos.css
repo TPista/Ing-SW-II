@@ -1,0 +1,102 @@
+body {
+  background-color: #ebebeb; /* Color gris */
+}
+
+h2, h3, h4, h5 {
+  text-align: center;
+}
+
+/*********** Para la 'a' **************/
+.prod_attrs {
+  text-decoration: none;
+  color: black;
+}
+
+.prod_attrs:hover {
+  text-decoration: none;
+  color: black;
+}
+
+/* Filtros */
+.inner-main {
+  display: flex;
+}
+
+.filters {
+  box-sizing: border-box;
+  -webkit-box-flex: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  max-width: 210px;
+}
+
+.filter-group {
+  text-align: left;
+  padding-left: 10px;
+  margin-right: 20px;
+}
+
+.filter-delete {
+  text-decoration: none;
+  color: red;
+}
+
+.filter-delete:hover {
+  text-decoration: none;
+  color: red;
+}
+
+.filter-name {
+  text-decoration: none;
+  color: blue;
+}
+
+.filter-name:hover {
+  text-decoration: none;
+  color: blue;
+}
+
+/************* Para cada uno de los productos ****************/
+
+/* ol->class  */
+.results-item {
+  float: left;
+  margin: 0 0px;
+  padding: 0 0px;
+  margin-right: 30px;
+  margin-bottom: 30px
+  width: 284px;
+  height: 373px;
+  display: block;
+  position: relative;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+
+  /* Borde del item */
+  border-radius: 5px 5px 5px 5px;
+  -moz-border-radius: 5px 5px 5px 5px;
+  -webkit-border-radius: 5px 5px 5px 5px;
+  border: 0px solid #000000;
+}
+
+/* div->div_item (tiene todo el item) */
+.div_item {
+  width: 284px;
+  background-color: #ffff;
+}
+
+.div_item_image {
+  float: left;
+  border-bottom: 1px solid #ebebef;
+}
+
+/* div->tiene la img */
+.prod_img {
+  /* Borde de la foto */
+  border-radius: 5px 5px 0px 0px;
+  -moz-border-radius: 5px 5px 0px 0px;
+  -webkit-border-radius: 5px 5px 0px 0px;
+  border: 0px solid #000000;
+}

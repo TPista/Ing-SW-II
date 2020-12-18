@@ -1,0 +1,54 @@
+body {
+	background-color: #ebebeb;
+}
+
+hr {
+	width: 75%;
+}
+
+.container {
+	width: 100%;
+	height: 100%;
+}
+
+.googleMap {
+	width: 50%;
+	float: right;
+}
+
+.contactInfo {
+	width: 50%;
+	height: 100%;
+	float: left;
+}
+
+.infoNosotros {
+	margin-bottom: 20px;
+}
+
+.Titulo {
+	text-align: center;
+	text-decoration: underline;
+}
+
+.infoTitulo {
+	font-size: 17pt;
+	text-decoration: underline;
+}
+
+.infoDatos {
+	font-size: 14pt;
+}
+
+.aIcono {
+	margin-left: 10px;
+	margin-bottom: 5px;
+}
+
+.orderList {
+	list-style-type: disc;
+}
+
+.infoSubTitulo {
+	font-size: 15pt;
+}

@@ -1,0 +1,292 @@
+***************** Tablas *****************
+CREATE DATABASE test
+-------------- Usuarios -------------- 
+CREATE TABLE `usuarios` (
+	`usr_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	`usr_name` VARCHAR(32) UNIQUE NOT NULL,
+	`usr_pw` VARCHAR(32) NOT NULL,
+	`usr_email` VARCHAR(50) UNIQUE NOT NULL,
+	`usr_tipo_cuenta` VARCHAR(15) NOT NULL,
+	`usr_preg` VARCHAR(40) NOT NULL,
+	`usr_resp` VARCHAR(15) NOT NULL,
+	`usr_dir` VARCHAR(50) NOT NULL,
+	`usr_pais` VARCHAR(25) NOT NULL,
+	`usr_cod_postal` SMALLINT UNSIGNED NOT NULL,
+	`usr_ultima_mod` TIMESTAMP NULL DEFAULT NULL,
+	`usr_tcreated` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`usr_id`)) ENGINE=INNODB;
+
+-------------- Productos --------------
+CREATE TABLE `productos` (
+	`prod_id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+	`prod_adm_id` INT UNSIGNED NOT NULL ,
+	`prod_titulo` VARCHAR(50) NOT NULL ,
+	`prod_cost` FLOAT UNSIGNED NOT NULL ,
+	`prod_marca` VARCHAR(25) NOT NULL ,
+	`prod_categoria` VARCHAR(7) NOT NULL ,
+	`prod_talle` VARCHAR(10) NOT NULL ,
+	`prod_color` VARCHAR(30) NOT NULL ,
+	`prod_usado` VARCHAR(6) NOT NULL ,
+	`prod_descripcion` TEXT(150) ,
+	`prod_dia_creado` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`prod_id`)) ENGINE = INNODB;
+
+-------------- Pedidos --------------
+CREATE TABLE `pedidos` (
+	`ped_id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+	`ped_prod_id` INT UNSIGNED NOT NULL ,
+	`ped_cliente_id` INT UNSIGNED NOT NULL ,
+	`ped_dia_creado` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`ped_id`)) ENGINE = InnoDB;
+
+-------------- Comprados ---------------
+CREATE TABLE `prod_comprados` (
+	`comprado_id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+	`comprado_cliente_id` INT UNSIGNED NOT NULL ,
+	`comprado_adm_nombre` VARCHAR(50) NOT NULL ,
+	`comprado_prod_titulo` VARCHAR(50) NOT NULL ,
+	`comprado_prod_cost` FLOAT UNSIGNED NOT NULL , 
+	`comprado_dia` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`comprado_id`)) ENGINE = INNODB;
+
+-------------- Vendidos ---------------
+CREATE TABLE `prod_vendidos` (
+	`vendido_id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+	`vendido_prod_id` INT UNSIGNED NOT NULL ,
+	`vendido_adm_id` INT UNSIGNED NOT NULL ,
+	`vendido_prod_titulo` VARCHAR(50) NOT NULL ,
+	`vendido_cliente_nombre` VARCHAR(50) NOT NULL ,
+	`vendido_prod_cost` FLOAT UNSIGNED NOT NULL ,
+	`vendido_dia` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`vendido_id`)) ENGINE = INNODB;
+
+-------------- Comentarios -----------------
+CREATE TABLE `comentarios` (
+	`comentario_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	`comentario_prod_id` INT UNSIGNED NOT NULL,
+	`comentario_cliente_id` INT UNSIGNED NOT NULL,
+	`comentario_puntaje` TINYINT UNSIGNED NOT NULL,
+	`comentario_titulo` VARCHAR(32) NOT NULL,
+	`comentario_texto` TEXT(400) NOT NULL,
+	`comentario_creado` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`comentario_id`)) ENGINE=INNODB;
+
+--------------- Carrusel --------------------
+CREATE TABLE `prod_carrousel` (
+	`prod_carr_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	`prod_carr_prod_id` INT UNSIGNED NOT NULL,
+	`prod_carr_seccion` INT UNSIGNED NOT NULL,
+	`prod_carr_adm_id` INT UNSIGNED NOT NULL,
+	PRIMARY KEY (`prod_carr_id`)) ENGINE=INNODB;
+
+**********************************************
+***************** Procedures *****************
+**********************************************
+
+-------------- Eliminar Usuario ---------------
+DELIMITER $$
+
+USE `test`$$
+
+DROP PROCEDURE IF EXISTS `eliminar_usuario`$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `eliminar_usuario`( IN u_id INT, IN is_adm TINYINT )
+BEGIN
+
+DELETE FROM usuarios WHERE usr_id=u_id;
+
+IF (is_adm > 0) THEN
+	DELETE FROM productos WHERE prod_adm_id=u_id;
+	DELETE FROM prod_vendidos WHERE vendido_adm_id=u_id;
+	DELETE FROM prod_carrousel WHERE prod_carr_adm_id=u_id;
+ELSE
+	DELETE FROM prod_comprados WHERE comprado_cliente_id=u_id;
+	DELETE FROM comentarios WHERE comentario_cliente_id=u_id;
+	DELETE FROM pedidos WHERE ped_cliente_id=u_id;
+END IF;
+
+END$$
+
+DELIMITER ;
+
+-------------- Eliminar Producto ---------------
+DELIMITER //
+CREATE PROCEDURE eliminar_producto( IN p_id INT ) 
+BEGIN
+	DELETE FROM productos WHERE prod_id=p_id; 
+	DELETE FROM prod_vendidos WHERE vendido_prod_id=p_id;
+	DELETE FROM comentarios WHERE comentario_prod_id=p_id;
+	DELETE FROM pedidos WHERE ped_prod_id=p_id;
+	DELETE FROM prod_carrousel WHERE prod_carr_prod_id=p_id;
+END //
+DELIMITER ;
+
+-------------- Comprar Productos ---------------
+DELIMITER $$
+
+USE `test`$$
+
+DROP PROCEDURE IF EXISTS `comprar_producto`$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `comprar_producto`( IN p_id INT, IN adm_id INT, IN cl_id INT, IN prod_tit VARCHAR(50), IN prod_cost FLOAT )
+BEGIN	
+	-- Agarramos el nombre del admin & usuario
+	DECLARE adm_name VARCHAR(32) DEFAULT NULL;
+	DECLARE cl_name VARCHAR(32) DEFAULT NULL;
+	
+	SELECT usr_name INTO adm_name FROM usuarios WHERE usr_id=adm_id;
+	SELECT usr_name INTO cl_name FROM usuarios WHERE usr_id=cl_id;
+
+	-- Lo guardamos en la tabla de clientes
+	INSERT INTO prod_comprados (comprado_cliente_id, comprado_adm_nombre, comprado_prod_titulo, comprado_prod_cost) VALUES (cl_id, adm_name, prod_tit, prod_cost);
+
+	-- Lo guardamos en la tabla de admins
+	INSERT INTO prod_vendidos (vendido_prod_id, vendido_adm_id, vendido_prod_titulo, vendido_cliente_nombre, vendido_prod_cost)
+	VALUES (p_id, adm_id, prod_tit, cl_name, prod_cost);
+END$$
+
+DELIMITER ;
+
+-------------- Mostrar Producto ---------------
+DELIMITER //
+CREATE PROCEDURE mostrar_producto( IN p_id INT )
+BEGIN
+	SELECT usr_id, usr_name, usr_email, usr_dir, usr_pais, usr_cod_postal,
+	prod_titulo, prod_cost, prod_marca, prod_categoria, prod_talle, prod_color, prod_usado, prod_descripcion FROM productos
+	JOIN usuarios ON prod_adm_id=usr_id WHERE prod_id = p_id;
+END //
+DELIMITER ;
+
+--------------- Carrito al Producto ---------------
+DELIMITER //
+CREATE PROCEDURE producto_al_carrito( IN p_id INT, IN cl_id INT )
+BEGIN
+	DECLARE existe INT;
+	SET existe = 0;
+	
+	SELECT p_id INTO existe FROM pedidos WHERE ped_prod_id = p_id;
+	
+	IF (existe > 0 ) THEN
+		DELETE FROM pedidos WHERE ped_prod_id=p_id;
+	ELSE
+		INSERT INTO pedidos (ped_prod_id, ped_cliente_id) VALUES (p_id, cl_id);
+	END IF;
+END //
+DELIMITER ;
+
+--------------- Producto en Carrito? ---------------
+DELIMITER $$
+CREATE PROCEDURE producto_en_carrito( IN p_id INT, IN cl_id INT )
+BEGIN
+	SELECT ped_id FROM pedidos WHERE ped_prod_id = p_id AND ped_cliente_id=cl_id;
+END$$
+DELIMITER ;
+
+--------------- Agregar Producto ------------------
+DELIMITER $$
+
+USE `test`$$
+
+DROP PROCEDURE IF EXISTS `agregar_producto`$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `agregar_producto`( IN adm_id INT, IN p_titulo VARCHAR(50), IN p_cost FLOAT,
+IN p_marca VARCHAR(25), IN p_cat VARCHAR(7), IN p_talle VARCHAR(10), IN p_color VARCHAR(30), IN p_usado VARCHAR(6), IN p_desc TEXT(150) )
+BEGIN
+
+DECLARE p_id INT;
+DECLARE mycount INT;
+SET p_id = mycount = 0;
+
+INSERT INTO productos (prod_adm_id, prod_titulo, prod_cost, prod_marca, prod_categoria, prod_talle, prod_color, prod_usado, prod_descripcion)
+VALUES (adm_id, p_titulo, p_cost, p_marca, p_cat, p_talle, p_color, p_usado, p_desc);
+
+SELECT LAST_INSERT_ID() INTO p_id;
+
+SELECT COUNT(prod_carr_id) INTO mycount FROM prod_carrousel
+JOIN productos ON prod_carr_prod_id = prod_id WHERE prod_usado = p_usado;
+
+IF (!mycount) THEN
+	INSERT INTO prod_carrousel (prod_carr_prod_id, prod_carr_seccion, prod_carr_adm_id) VALUES (p_id, 1, adm_id);
+ELSE
+	INSERT INTO prod_carrousel (prod_carr_prod_id, prod_carr_seccion, prod_carr_adm_id) VALUES (p_id, FLOOR( 1 + RAND( ) *2 ), adm_id);
+END IF;
+
+SELECT p_id AS last_pid;
+
+END$$
+
+DELIMITER ;
+
+------------------- Count de Productos Nuevos Carrousel ----------------------
+DELIMITER $$
+
+USE `test`$$
+
+DROP PROCEDURE IF EXISTS `count_productos_carrousel_nuevo`$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `count_productos_carrousel_nuevo`(IN id_slide INT)
+BEGIN
+	SELECT COUNT(prod_carr_id) AS total FROM prod_carrousel
+	JOIN productos ON prod_id = prod_carr_prod_id
+	WHERE prod_carr_seccion=id_slide AND prod_usado="Nuevo";
+END$$
+
+DELIMITER ;
+------------------- Count de Productos Usados Carrousel ----------------------
+DELIMITER $$
+
+USE `test`$$
+
+DROP PROCEDURE IF EXISTS `count_productos_carrousel_usado`$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `count_productos_carrousel_usado`(IN id_slide INT)
+BEGIN
+	SELECT COUNT(prod_carr_id) AS total FROM prod_carrousel
+	JOIN productos ON prod_id = prod_carr_prod_id
+	WHERE prod_carr_seccion=id_slide AND prod_usado="Usado";
+END$$
+
+DELIMITER ;
+------------------- Productos Nuevos Carrousel ----------------------
+DELIMITER $$
+USE `test`$$
+DROP PROCEDURE IF EXISTS `productos_carrousel_nuevo`$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `productos_carrousel_nuevo`( IN slide_num INT )
+BEGIN
+	SELECT prod_id, prod_titulo, prod_cost FROM productos
+	JOIN prod_carrousel ON prod_id=prod_carr_prod_id
+	WHERE prod_usado="Nuevo" AND prod_carr_seccion=slide_num
+	ORDER BY RAND() LIMIT 3;
+END$$
+DELIMITER ;
+------------------- Productos Usados Carrousel ----------------------
+DELIMITER $$
+USE `test`$$
+DROP PROCEDURE IF EXISTS `productos_carrousel_usado`$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `productos_carrousel_usado`( IN slide_num INT )
+BEGIN
+	SELECT prod_id, prod_titulo, prod_cost FROM productos
+	JOIN prod_carrousel ON prod_id=prod_carr_prod_id
+	WHERE prod_usado="Usado" AND prod_carr_seccion=slide_num
+	ORDER BY RAND() LIMIT 3;
+END$$
+DELIMITER ;
+
+------------------- Comprar producto ----------------------
+BEGIN	
+	-- Agarramos el nombre del admin & usuario
+	DECLARE adm_name VARCHAR(32) DEFAULT NULL;
+	DECLARE cl_name VARCHAR(32) DEFAULT NULL;
+	
+	SELECT usr_name INTO adm_name FROM usuarios WHERE usr_id=adm_id;
+	SELECT usr_name INTO cl_name FROM usuarios WHERE usr_id=cl_id;
+
+	-- Lo guardamos en la tabla de clientes
+	INSERT INTO prod_comprados (comprado_cliente_id, comprado_adm_nombre, comprado_prod_titulo, comprado_prod_cost) VALUES (cl_id, adm_name, prod_tit, prod_cost);
+
+	-- Lo guardamos en la tabla de admins
+	INSERT INTO prod_vendidos (vendido_prod_id, vendido_adm_id, vendido_prod_titulo, vendido_cliente_nombre, vendido_prod_cost)
+	VALUES (p_id, adm_id, prod_tit, cl_name, prod_cost);
+END

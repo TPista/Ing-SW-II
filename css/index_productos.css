@@ -1,0 +1,72 @@
+.titulo-tabla{
+  color:#606263;
+  text-align:center;
+  margin-top:15px;
+  margin-bottom:15px;
+  font-weight:bold;
+}
+
+body {
+	background-color: #ebebeb;
+}
+
+#mitabla {
+	background-color: #fff;
+    text-align: center;
+}
+
+.btn {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.btn-app {
+    color: white;
+    box-shadow: none;
+    border-radius: 3px;
+    position: relative;
+    padding: 10px 15px;
+    margin: 0;
+    min-width: 60px;
+    max-width: 80px;
+    text-align: center;
+    border: 1px solid #ddd;
+    background-color: #f4f4f4;
+    font-size: 12px;
+    transition: all .2s;
+    background-color: steelblue !important;
+}
+
+.btn-primary {
+	text-align: right;
+	height: 35px;
+}
+
+/* Movemos el buscador a la izquierda*/
+div.dataTables_wrapper div.dataTables_filter {
+    text-align: left;
+    margin-top: 15px;
+}
+
+/* Borramos el molesto boton */
+.btn-secondary {
+    display: none;
+    color: #fff;
+    background-color: #4682b4;
+    border-color: #4682b4;
+}
+.btn-secondary:hover {
+    color: #fff;
+    background-color: #315f86;
+    border-color: #545b62;
+}

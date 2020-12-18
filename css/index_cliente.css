@@ -1,0 +1,59 @@
+body {
+	background-color: #ebebeb;
+}
+
+h1 {
+	text-align: center;
+	margin-top: 2%;
+}
+
+h2 {
+	margin-left: 10%;
+}
+
+h4 {
+	text-align: center;
+}
+
+.global {
+	width: 100%;
+	padding-top: 40px;
+}
+
+/*********** Para la 'a' **************/
+.prod_attrs {
+  text-decoration: none;
+  color: black;
+}
+
+.prod_attrs:hover {
+  text-decoration: none;
+  color: black;
+}
+
+/************* Para cada uno de los productos ****************/
+
+.carousel-inner {
+	width: 80%;
+	margin: 0 auto;
+}
+
+.topContent {
+	width: 160px;
+	font-size: 25px;
+	margin-left: auto;
+	margin-right: auto;
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.carrousel {
+	height: 200px;
+}
+
+/* div->div_item (tiene todo el item) */
+.div_item {
+  width: 284px;
+  background-color: #ffff;
+}
